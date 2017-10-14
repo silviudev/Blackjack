@@ -47,7 +47,7 @@ public class Blackjack extends Application{
       Scene menuScene = new Scene(menu);
       Canvas canvas = new Canvas(800,600);
       
-      Card card1 = new Card("assets/images/2C.png", 2, "Clubs");
+      Card card1 = new Card("assets/images/cards/2C.png", 2, "Clubs");
       Image background = new Image("assets/images/background.png");
       Image deck = new Image("assets/images/deck.png");
       
