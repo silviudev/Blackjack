@@ -19,8 +19,8 @@ public class Blackjack extends Application{
    @Override
    public void start(Stage mainStage){
       BooleanValue dealCard = new BooleanValue(false);
-      IntValue xOffset = new IntValue(93);
-      IntValue previousX = new IntValue(-85);
+      IntValue xOffset = new IntValue(96);
+      IntValue previousX = new IntValue(-81);
       IntValue playerHandSize = new IntValue(0);
    
       mainStage.setTitle("Blackjack by Silviu Popovici");
@@ -29,49 +29,51 @@ public class Blackjack extends Application{
       
       Group root = new Group();
       VBox menu = new VBox();
-      Button button1 = new Button("Go to Game");
-      Button button2 = new Button("Hit Me!");
-      Button button3 = new Button("Clear Player Cards");
+      Button startGameButton = new Button("Go to Game");
+      Button hitButton = new Button("Hit Me!");
+      Button clearButton = new Button("Clear Player Cards");
       
       Pane pane = new Pane();
-      pane.getChildren().add(button2);
-      pane.getChildren().add(button3);
+      pane.getChildren().add(hitButton);
+      pane.getChildren().add(clearButton);
       
-      button2.setTranslateX(10);
-      button2.setTranslateY(350);
+      hitButton.setTranslateX(10);
+      hitButton.setTranslateY(350);
       
-      button3.setTranslateX(60);
-      button3.setTranslateY(350);
+      clearButton.setTranslateX(70);
+      clearButton.setTranslateY(350);
       
       Scene gameScene = new Scene(root);
       Scene menuScene = new Scene(menu);
       Canvas canvas = new Canvas(800,600);
       
-      Card card1 = new Card("assets/images/cards/2C.png", 2, "Clubs");
+      Deck theDeck = new Deck(); 
+      theDeck.shuffle();     
+        
       Image background = new Image("assets/images/background.png");
-      Image deck = new Image("assets/images/deck.png");
+      Image deckImage = new Image("assets/images/deck.png");
       
       Timeline gameLoop = new Timeline();
       
       mainStage.setScene(gameScene);
       root.getChildren().add(canvas);
       root.getChildren().add(pane);
-      menu.getChildren().add(button1);
+      menu.getChildren().add(startGameButton);
       GraphicsContext gc = canvas.getGraphicsContext2D();  
       gameLoop.setCycleCount(Timeline.INDEFINITE);
       
       final long timeStart = System.currentTimeMillis();
       
-      button1.setOnAction(e->mainStage.setScene(gameScene));
-      button2.setOnAction(e->{
+      startGameButton.setOnAction(e->mainStage.setScene(gameScene));
+      hitButton.setOnAction(e->{
          if(playerHandSize.value < 8)dealCard.value = true;
       });
-      button3.setOnAction(e->{
+      clearButton.setOnAction(e->{
          clearCards(gc, previousX, playerHandSize);
-         drawBackground(gc,background,deck);
+         drawBackground(gc,background,deckImage);
       });
       
-      drawBackground(gc,background,deck);
+      drawBackground(gc,background,deckImage);
       
       KeyFrame frame = new KeyFrame(
             Duration.seconds(0.017),   // 1000/60 for 60 FPS
@@ -79,7 +81,7 @@ public class Blackjack extends Application{
                   //double t = (System.currentTimeMillis() - timeStart) / 1000.0; 
                     
                   if(dealCard.value && playerHandSize.value < 8){
-                     gc.drawImage(card1.getImage(), previousX.value+xOffset.value, 405);
+                     gc.drawImage(theDeck.drawCard().getImage(), previousX.value+xOffset.value, 425);
                      previousX.value+=xOffset.value;
                      dealCard.value = false;
                      playerHandSize.value++;
