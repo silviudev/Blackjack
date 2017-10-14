@@ -13,15 +13,24 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Pane;
+import java.util.ArrayList;
 
 public class Blackjack extends Application{
 
    @Override
    public void start(Stage mainStage){
       BooleanValue dealCard = new BooleanValue(false);
+      BooleanValue dealersTurn = new BooleanValue(false);
+      
       IntValue xOffset = new IntValue(96);
       IntValue previousX = new IntValue(-81);
-      IntValue playerHandSize = new IntValue(0);
+      IntValue turn = new IntValue(0); 
+      
+      Player player = new Player();
+      Player dealer = new Player();
+      
+      player.setMoney(1000);
+      player.setBet(50);
    
       mainStage.setTitle("Blackjack by Silviu Popovici");
       mainStage.sizeToScene();
@@ -66,10 +75,10 @@ public class Blackjack extends Application{
       
       startGameButton.setOnAction(e->mainStage.setScene(gameScene));
       hitButton.setOnAction(e->{
-         if(playerHandSize.value < 8)dealCard.value = true;
+         if(player.getHand().size() < 8) dealCard.value = true;
       });
       clearButton.setOnAction(e->{
-         clearCards(gc, previousX, playerHandSize);
+         clearCards(gc, previousX, player);
          drawBackground(gc,background,deckImage);
       });
       
@@ -79,12 +88,14 @@ public class Blackjack extends Application{
             Duration.seconds(0.017),   // 1000/60 for 60 FPS
             e ->{ 
                   //double t = (System.currentTimeMillis() - timeStart) / 1000.0; 
-                    
-                  if(dealCard.value && playerHandSize.value < 8){
-                     gc.drawImage(theDeck.drawCard().getImage(), previousX.value+xOffset.value, 425);
+                  Card currentCard;
+                  //Draw a card for the player   
+                  if(dealCard.value && player.getHand().size() < 8){
+                     currentCard = theDeck.drawCard();
+                     gc.drawImage(currentCard.getImage(), previousX.value + xOffset.value, 425);
                      previousX.value+=xOffset.value;
                      dealCard.value = false;
-                     playerHandSize.value++;
+                     player.addToHand(currentCard);
                   }
                });
                gameLoop.getKeyFrames().add(frame);
@@ -97,10 +108,10 @@ public class Blackjack extends Application{
       gc.drawImage(deck, 660, 10);
    }
    
-   public void clearCards(GraphicsContext gc, IntValue prev, IntValue playerHand){
+   public void clearCards(GraphicsContext gc, IntValue prev, Player player){
       gc.clearRect(0, 404, 800,600);
       prev.value = -85;
-      playerHand.value = 0;
+      player.resetHand();
    }
    
    public static void main(String[] args){
