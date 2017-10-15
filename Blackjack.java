@@ -25,7 +25,8 @@ public class Blackjack extends Application{
       BooleanValue dealersTurn = new BooleanValue(false);
       BooleanValue gameStarted = new BooleanValue(false);
       BooleanValue playerStayed = new BooleanValue(false);
-      
+      BooleanValue gameOver = new BooleanValue(false);
+
       IntValue xOffset = new IntValue(96);
       IntValue previousX = new IntValue(-81);
       
@@ -38,50 +39,67 @@ public class Blackjack extends Application{
       mainStage.setTitle("Blackjack by Silviu Popovici");
       mainStage.sizeToScene();
       mainStage.setResizable(false);
+      mainStage.getIcons().add(new Image(Blackjack.class.getResourceAsStream( "assets/images/ace_icon.png" ))); 
       
       Group root = new Group();
       VBox menu = new VBox();
+      
       Button startGameButton = new Button("Start Game");
       Button hitButton = new Button("Hit Me!");
-      Button clearButton = new Button("Clear Cards");
+      Button clearButton = new Button("Play Again");
+      Button stayButton = new Button("Stay");
       
       Text playerHandValueDisplay = new Text();
       playerHandValueDisplay.setX(20.0f);
-      playerHandValueDisplay.setY(50.0f);
+      playerHandValueDisplay.setY(30.0f);
       playerHandValueDisplay.setFill(Color.YELLOW);
       playerHandValueDisplay.setFont(Font.font(null, FontWeight.BOLD, 26));
       
       Text dealerHandValueDisplay = new Text();
       dealerHandValueDisplay.setX(20.0f);
-      dealerHandValueDisplay.setY(80.0f);
+      dealerHandValueDisplay.setY(60.0f);
       dealerHandValueDisplay.setFill(Color.YELLOW);
       dealerHandValueDisplay.setFont(Font.font(null, FontWeight.BOLD, 26));
       
       Text moneyDisplay = new Text();
       moneyDisplay.setX(330.0f);
-      moneyDisplay.setY(50.0f);
+      moneyDisplay.setY(30.0f);
       moneyDisplay.setFill(Color.YELLOW);
       moneyDisplay.setFont(Font.font(null, FontWeight.BOLD, 26));
       
       Text betDisplay = new Text();
       betDisplay.setX(330.0f);
-      betDisplay.setY(80.0f);
+      betDisplay.setY(60.0f);
       betDisplay.setFill(Color.YELLOW);
       betDisplay.setFont(Font.font(null, FontWeight.BOLD, 26));
+      
+      Text gameOverDisplay = new Text();
+      gameOverDisplay.setX(20.0f);
+      gameOverDisplay.setY(110.0f);
+      gameOverDisplay.setFill(Color.YELLOW);
+      gameOverDisplay.setFont(Font.font(null, FontWeight.BOLD, 30));
       
       Pane pane = new Pane();
       pane.getChildren().add(hitButton);
       pane.getChildren().add(clearButton);
+      pane.getChildren().add(stayButton);
       pane.getChildren().add(playerHandValueDisplay);
       pane.getChildren().add(dealerHandValueDisplay);
       pane.getChildren().add(moneyDisplay);
       pane.getChildren().add(betDisplay);
+      pane.getChildren().add(gameOverDisplay);
 
       
       hitButton.setTranslateX(10);
-      hitButton.setTranslateY(350);
+      hitButton.setTranslateY(325);
+      hitButton.setStyle("-fx-font-size: 27px");
       
-      clearButton.setTranslateX(70);
+      
+      stayButton.setTranslateX(140);
+      stayButton.setTranslateY(325);
+      stayButton.setStyle("-fx-font-size: 27px");
+      
+      clearButton.setTranslateX(250);
       clearButton.setTranslateY(350);
       
       Scene gameScene = new Scene(root);
@@ -115,13 +133,15 @@ public class Blackjack extends Application{
 //       gc.setFont(theFont);
       
       startGameButton.setOnAction(e->mainStage.setScene(gameScene));
+      
       hitButton.setOnAction(e->{
          if(player.getHand().size() < 8) {
-            dealCard(player, theDeck);  
+            dealCard(player, theDeck); 
          }
       });
+      
       clearButton.setOnAction(e->{
-         clearCards(gc, previousX, player, dealer);
+         resetGame(gc, previousX, player, dealer, gameOver);
          dealInitial(player,dealer,theDeck);
          drawBackground(gc,background,deckImage);
       });
@@ -131,7 +151,33 @@ public class Blackjack extends Application{
       
       KeyFrame frame = new KeyFrame(
             Duration.seconds(0.017),   // 1000/60 for 60 FPS
-            e ->{     
+            e ->{  
+                   String check;
+                   check = checkGameOver(player,dealer,dealersTurn);
+                   if(check != ""){
+                     gameOver.value = true;
+                     if(check == "bust"){
+                        gameOverDisplay.setText("GAME OVER - YOU BUSTED!");
+                     }else if(check == "win"){
+                        gameOverDisplay.setText("GAME OVER - YOU WIN!");
+                     }else if(check == "blackjack"){
+                        gameOverDisplay.setText("GAME OVER - BLACKJACK!!");
+                     }
+                     else{
+                        gameOverDisplay.setText("GAME OVER - IT'S A PUSH!");
+                     }
+                   }else{
+                     gameOverDisplay.setText("");
+                   }
+                   
+
+                   
+                   if(gameOver.value){
+                     hitButton.setDisable(true);
+                   }else if(!gameOver.value){
+                     hitButton.setDisable(false);
+                   }
+                      
                    drawBackground(gc,background,deckImage);
                    //double t = (System.currentTimeMillis() - timeStart) / 1000.0; 
                    Card currentCard;
@@ -186,11 +232,12 @@ public class Blackjack extends Application{
       gc.drawImage(deck, 660, 10);
    }
    
-   public void clearCards(GraphicsContext gc, IntValue prev, Player player, Player dealer){
+   public void resetGame(GraphicsContext gc, IntValue prev, Player player, Player dealer, BooleanValue gameOver){
       gc.clearRect(0, 404, 800,600);
       prev.value = -85;
       player.resetHand();
       dealer.resetHand();
+      gameOver.value = false;
    }
    
    public void dealInitial(Player player, Player dealer, Deck deck){
@@ -202,6 +249,23 @@ public class Blackjack extends Application{
    
    public void dealCard(Player player, Deck deck){
       player.addToHand(deck.drawCard());
+   }
+   
+   public String checkGameOver(Player player, Player dealer, BooleanValue dealersTurn){
+      if(player.getHandValue() == 21 && player.getHand().size() == 2){
+         return "blackjack";
+      }else if(player.getHandValue() == 21){
+         return "win";
+      }else if(player.getHandValue() > 21){
+         return "bust";
+      }else if(dealer.getHandValue() > 21){
+         return "win";
+      }else if(player.getHandValue() > dealer.getHandValue() && dealersTurn.value){
+         return "win";
+      }else if(player.getHandValue() == dealer.getHandValue() && dealersTurn.value){
+         return "push";
+      }
+      return "";
    }
    
    public static void main(String[] args){

@@ -11,7 +11,11 @@ public class Player{
       }
       
       public int getHandValue(){
-         return handValue;
+         if(aceInHand() && handValue + 10 <= 21){
+            return handValue + 10;
+         }else{
+            return handValue;
+         }
       }
       
       public int getBet(){
@@ -50,6 +54,15 @@ public class Player{
       
       private void incrementHandValue(int value){
          handValue += value;
+      }
+      
+      public boolean aceInHand(){
+         for(Card card : hand){
+            if(card.getValue() == 1){
+               return true;
+            }
+         }
+         return false;
       }
 
 }
