@@ -1,13 +1,13 @@
 import java.util.*;
 
 public class Player{
-      private ArrayList hand; 
+      private ArrayList<Card> hand; 
       private int handValue;
       private int bet;
       private int money;
       
       public Player(){
-         hand = new ArrayList();
+         hand = new ArrayList<Card>();
       }
       
       public int getHandValue(){
@@ -22,7 +22,7 @@ public class Player{
          return money;
       }
       
-      public ArrayList getHand(){
+      public ArrayList<Card> getHand(){
          return hand;
       }
       
@@ -45,6 +45,7 @@ public class Player{
       
       public void resetHand(){
          hand = new ArrayList();
+         handValue = 0;
       }
       
       private void incrementHandValue(int value){
