@@ -34,6 +34,10 @@ public class Player{
          bet = value;
       }
       
+      public void increaseBet(int value){
+         bet+=value;
+      }
+      
       public void setMoney(int value){
          money = value;
       }
