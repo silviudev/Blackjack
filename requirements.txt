@@ -1,0 +1,6 @@
+DEPENDENCIES OF THIS PROJECT:
+
+-Java JDK 8 or higher
+-JavaFX 8 or higher
+-SQLite JDBC library in the java classpath
+-An instance of a SQLite embedded database in the database folder, with one table named scores with two fields: VARCHAR name and INT score.

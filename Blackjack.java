@@ -31,6 +31,10 @@ public class Blackjack extends Application{
 
    @Override
    public void start(Stage mainStage){
+      /*Various boolean values needed throughout the game. Objects are needed 
+      instead of regular booleans because regular local booleans could not be referenced
+      from inside the lambda expressions used for the event listeners and game loop
+      */
       BooleanValue hit = new BooleanValue(false);
       BooleanValue dealersTurn = new BooleanValue(false);
       BooleanValue gameStarted = new BooleanValue(false);
@@ -38,15 +42,20 @@ public class Blackjack extends Application{
       BooleanValue betFinished = new BooleanValue(false);
       BooleanValue initialCardsDealt = new BooleanValue(false);
       
+      /*SQLite database connection*/
       Connection conn = SQLConnection.DbConnector();
       checkConnection(conn);
-   
+      
+      /*xOffset and previousX are used to define the spacing between cards when drawing the player
+      and dealer's hands*/
       IntValue xOffset = new IntValue(96);
       IntValue previousX = new IntValue(-81);
       
+      /*Objects for the player and dealer. Note that the dealer is also a Player*/
       Player player = new Player();
       Player dealer = new Player();
       
+      /*Alerts that pop up at various points in the game*/
       Alert zeroBetWarning = new Alert(AlertType.WARNING, "Bet cannot be zero! Click the chips to bet.");
       zeroBetWarning.setHeaderText(null);
       
@@ -54,29 +63,37 @@ public class Blackjack extends Application{
       zeroMoneyWarning.setHeaderText(null);
       
       Alert savedScoreAlert = new Alert(AlertType.INFORMATION, "Your score was saved!");
-      zeroMoneyWarning.setHeaderText(null);
+      savedScoreAlert.setHeaderText(null);
       
+      /*Initial player money*/
       player.setMoney(1000);
       
+      /*oldMoney is used for the resetBet command during the betting phase. It remembers the player's money before
+      they started to increase their bet so the application knows what to reset the money to when resetting the bet to zero*/
       IntValue oldMoney = new IntValue(player.getMoney());
-   
+      
+      /*Configure the main stage to resize properly, plus set icon and title*/
       mainStage.setTitle("Blackjack by Silviu Popovici");
       mainStage.sizeToScene();
       mainStage.setResizable(false);
-      mainStage.getIcons().add(new Image(Blackjack.class.getResourceAsStream( "assets/images/ace_icon.png" ))); 
+      mainStage.getIcons().add(new Image("/assets/images/ace_icon.png")); 
       
+      /*Group elements that will contain the Canvases and Panes*/
       Group root = new Group();
       Group menu = new Group();
       Group instructionsGroup = new Group();
       Group saveScoreGroup = new Group();
       Group viewScoresGroup = new Group();
       
+      /*Transparent circles that sit on top of the betting chips in order to 
+      define a "hitbox" to click on when betting*/
       Circle redChip = new Circle(327, 356, 44, Color.TRANSPARENT);
       Circle blueChip = new Circle(433, 356, 44, Color.TRANSPARENT);
       Circle greenChip = new Circle(535, 356, 44, Color.TRANSPARENT);
       Circle blackChip = new Circle(641, 355, 44, Color.TRANSPARENT);
       Circle yellowChip = new Circle(745, 354, 44, Color.TRANSPARENT);
       
+      /*Declaring all buttons for the application*/
       Button startGameButton = new Button("Start Game");
       Button instructionsButton = new Button("View Instructions");
       Button viewScoresButton = new Button("View High Score List");
@@ -113,6 +130,7 @@ public class Blackjack extends Application{
       int labelTranslateX = 320;
       int labelYOffset = 0;
       
+      /*Give all the score labels x and y coordinates and styles*/
       for(int i =0; i < labelArray.length; i++){
          labelArray[i].setStyle("-fx-font-size: 18px");
          labelArray[i].setTranslateX(labelTranslateX);
@@ -120,6 +138,8 @@ public class Blackjack extends Application{
          labelYOffset+=50;
       }
       
+      /*Text field and text displays for displaying various game data, 
+        and their X and Y and styles*/
       TextField nameBox = new TextField();
       
       Text playerMoneyScore = new Text();
@@ -164,6 +184,9 @@ public class Blackjack extends Application{
       gameOverDisplay.setFill(Color.YELLOW);
       gameOverDisplay.setFont(Font.font(null, FontWeight.BOLD, 30));
       
+      /*Panes containing buttons and labels that sit on top of Canvases in the Groups
+      This is done in order to have buttons and other JavaFX controls mixed in with Canvas graphics
+      being drawn underneath*/
       Pane pane = new Pane();
       Pane menuPane = new Pane();
       Pane instructionsPane = new Pane();
@@ -203,6 +226,7 @@ public class Blackjack extends Application{
       viewScoresPane.getChildren().add(toMenuFromScores);
       viewScoresPane.getChildren().addAll(score1,score2,score3,score4,score5,score6,score7,score8,score9,score10);
       
+      /*Setting all buttons' X and Y coordinates and styles*/
       startGameButton.setTranslateX(288);
       startGameButton.setTranslateY(395);
       startGameButton.setStyle("-fx-font-size: 18px; -fx-border-color: red; -fx-cursor: hand");
@@ -270,25 +294,36 @@ public class Blackjack extends Application{
       insertScoreButton.setTranslateY(300);
       insertScoreButton.setStyle("-fx-font-size: 24px; -fx-cursor: hand");
       
+      /*X and Y coordinates and style for Name box on save score screen*/
       nameBox.setTranslateX(230);
       nameBox.setTranslateY(230);
       nameBox.setStyle("-fx-font-size: 24px");
       
+      /*Declaring the scenes that will be used and adding the Groups to them
+        gameScene = main game screen
+        menuScene = main menu upon startup
+        instructionsScene = the game instructions screen 
+        saveScoreScene = the screen where user enters their name to save score to DB
+        viewScoresScene = screen where user can view top 10 high scores
+      */
       Scene gameScene = new Scene(root);
       Scene menuScene = new Scene(menu);
       Scene instructionsScene = new Scene(instructionsGroup);
       Scene saveScoreScene = new Scene(saveScoreGroup);
       Scene viewScoresScene = new Scene(viewScoresGroup);
       
+      /*Declaring the Canvases that graphics will be drawn to*/
       Canvas canvas = new Canvas(800,600);
       Canvas menuCanvas = new Canvas(800,600);
       Canvas instructionsCanvas = new Canvas(800,600);
       Canvas saveScoreCanvas = new Canvas(800,600);
       Canvas viewScoresCanvas = new Canvas(800,600);
       
+      /*Deck object to represent the deck of cards*/
       Deck theDeck = new Deck(); 
       theDeck.shuffle();     
         
+      /*Load various background images*/  
       Image background = new Image("assets/images/background.png");
       Image deckImage = new Image("assets/images/deck.png");
       Image cardBack = new Image("assets/images/cardBack.png");
@@ -297,10 +332,14 @@ public class Blackjack extends Application{
       Image nameBackground = new Image("assets/images/nameBackground.png");
       Image scoresBackground = new Image("assets/images/scoresBackground.png");
       
+      /*Initialize the game loop*/
       Timeline gameLoop = new Timeline();
       
+      /*Set the first scene to be the main menu*/
       mainStage.setScene(menuScene);
       
+      /*Add the Canvases and Panes to the groups. Canvases must be added first 
+      for each Group or else the Canvas will cover the Pane*/
       root.getChildren().add(canvas);
       root.getChildren().add(pane);
       menu.getChildren().add(menuCanvas);
@@ -312,15 +351,21 @@ public class Blackjack extends Application{
       viewScoresGroup.getChildren().add(viewScoresCanvas);
       viewScoresGroup.getChildren().add(viewScoresPane);
       
-      
+      /*GraphicsContext objects that get attached to the Canvases in order to 
+      be able to draw graphics. One for each Scene*/
       GraphicsContext gc = canvas.getGraphicsContext2D();  
       GraphicsContext mgc = menuCanvas.getGraphicsContext2D(); 
       GraphicsContext igc = instructionsCanvas.getGraphicsContext2D();
       GraphicsContext sgc = saveScoreCanvas.getGraphicsContext2D();
       GraphicsContext vgc = viewScoresCanvas.getGraphicsContext2D();
       
+      /*Set the game loop to go on indefinitely*/
       gameLoop.setCycleCount(Timeline.INDEFINITE);
-           
+      
+      /*====EVENT LISTENERS====*/ 
+      
+      /*Listeners for the "hitbox" transparent circles that are laid on top
+      of the betting chips. Used to click chips to increase bet during betting phase*/    
       redChip.setOnMouseClicked(e->{
          if(!betFinished.value && 5 <= player.getMoney()){
             player.increaseBet(5);
@@ -356,6 +401,7 @@ public class Blackjack extends Application{
          }
       });
       
+      /*===BUTTON EVENT LISTENERS ===*/
       startGameButton.setOnAction(e->{
          mainStage.setScene(gameScene);
          resetGame(gc, previousX, player, dealer, gameOver, dealersTurn, betFinished);
@@ -461,12 +507,14 @@ public class Blackjack extends Application{
       });
       
       toMenuFromScores.setOnAction(e->mainStage.setScene(menuScene));
-   
-      drawBackground(gc,background,deckImage);
+      /*===END EVENT LISTENERS===*/
       
+      /*Define the KeyFrame used for the animation*/
       KeyFrame frame = new KeyFrame(
-            Duration.seconds(0.050),   // 1000/50 for 20 FPS
+            Duration.seconds(0.050),   // 1000/50 for 20 FPS - don't need any more for this game
             e ->{  
+                   /*If betting phase is not finished, display the bet buttons and text. Otherwise,
+                   hide them and deal the initial cards*/
                    if(!betFinished.value){
                      betInstructionsDisplay.setText("-Click on the Chips to increase bet-");
                      resetBetButton.setVisible(true);
@@ -478,7 +526,9 @@ public class Blackjack extends Application{
                      resetBetButton.setVisible(false);
                      finishBetButton.setVisible(false);
                    }   
-                     
+                   
+                   /*Check game over conditions and display game over text as appropriate, 
+                   as well as setting the player's money as appropriate*/  
                    String check;
                    check = checkGameOver(player,dealer,dealersTurn);
                    if(check != ""){
@@ -510,6 +560,8 @@ public class Blackjack extends Application{
                      gameOverDisplay.setText("");
                    }
                    
+                   /*If the game is over, display the play again and save score buttons,
+                    otherwise hide them*/
                    if(gameOver.value){
                      clearButton.setVisible(true);
                      saveScoreButton.setVisible(true);
@@ -519,7 +571,8 @@ public class Blackjack extends Application{
                      saveScoreButton.setVisible(false);
                    }
 
-                   
+                   /*If the game is over, or it's the dealer's turn, or it's still betting phase, disable
+                   the hit and stay buttons, otherwise enable them*/
                    if(gameOver.value || dealersTurn.value || !betFinished.value){
                      hitButton.setDisable(true);
                      stayButton.setDisable(true);
@@ -527,8 +580,11 @@ public class Blackjack extends Application{
                      hitButton.setDisable(false);
                      stayButton.setDisable(false);
                    }
-                                   
+                   
+                   /*draw the background*/                
                    drawBackground(gc,background,deckImage);
+                   
+                   
                    Card currentCard;
                     
                    ArrayList<Card> playerHand = player.getHand();
@@ -558,7 +614,7 @@ public class Blackjack extends Application{
 
                    previousX.value = -81;
                    
-                   //Display the UI text   
+                   //Display the UI text  for player and dealer cards, player's money, and current bet  
                    playerHandValueDisplay.setText("Player Showing: " + player.getHandValue());
                    
                    if(!dealersTurn.value && dealerHand.size() > 0){
@@ -592,11 +648,13 @@ public class Blackjack extends Application{
                mainStage.show();
             }
    
+   /*drawBackground() draws the background image and the deck image for the main game scene*/
    public void drawBackground(GraphicsContext gc, Image bg, Image deck){
       gc.drawImage(bg, 0,0);
       gc.drawImage(deck, 660, 10);
    }
    
+   /*resetGame() resets various game variables and clears the screen*/
    public void resetGame(GraphicsContext gc, IntValue prev, Player player, Player dealer, BooleanValue gameOver, 
                          BooleanValue dealersTurn, BooleanValue betFinished){
       gc.clearRect(0, 404, 800,600);
@@ -608,6 +666,7 @@ public class Blackjack extends Application{
       betFinished.value = false;
    }
    
+   /*dealInitial() deals the initial two cards to the player and dealer*/
    public void dealInitial(Player player, Player dealer, Deck deck){
       dealCard(player, deck);
       dealCard(player, deck);
@@ -615,10 +674,12 @@ public class Blackjack extends Application{
       dealCard(dealer, deck);
    }
    
+   /*dealCard() deals a card to the player*/
    public void dealCard(Player player, Deck deck){
       player.addToHand(deck.drawCard());
    }
    
+   /*checkGameOver() checks if any game over conditions have been met according to blackjack rules*/
    public String checkGameOver(Player player, Player dealer, BooleanValue dealersTurn){
       if(player.getHandValue() == 21 && player.getHand().size() == 2){
          return "blackjack";
@@ -638,12 +699,14 @@ public class Blackjack extends Application{
       return "";
    }
    
+   /*runDealersTurn() processes the dealer's turnm kaing him hit up to and including 17*/
    public void runDealersTurn(Player dealer, Deck deck){
       while(dealer.getHandValue() < 18){
          dealer.addToHand(deck.drawCard());
       }
    }
    
+   /*checkConnection checks the connection to the embedded SQLite database*/
    public void checkConnection(Connection conn){
       if(conn == null){
          System.out.println("Database Connection failed");
@@ -652,6 +715,8 @@ public class Blackjack extends Application{
       }
    }
    
+   /*main method calls the launch method, which in JavaFX calls the init() method
+   and then the start method, which has been overridden inside this class*/
    public static void main(String[] args){
       launch(args);
    }

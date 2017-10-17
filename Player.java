@@ -1,5 +1,7 @@
 import java.util.*;
 
+/*Player class defines a player of blackjack. Both the player
+and the dealer have their behavior defined by this class*/
 public class Player{
       private ArrayList<Card> hand; 
       private int handValue;

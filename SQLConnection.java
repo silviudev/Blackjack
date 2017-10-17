@@ -2,6 +2,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+/*Defines a SQL connection using JDBC to connect to SQLite database*/
 public class SQLConnection{
    public static Connection DbConnector(){
       try{

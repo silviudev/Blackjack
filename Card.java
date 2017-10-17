@@ -1,5 +1,7 @@
 import javafx.scene.image.Image;
 
+/*Card class defines a playing card, including its Image file,
+   card value and suit*/
 public class Card{
    private Image img;
    private int value;
