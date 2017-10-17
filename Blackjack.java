@@ -10,6 +10,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Label;
 import javafx.scene.Cursor;
 import javafx.animation.Timeline;
 import javafx.animation.KeyFrame;
@@ -68,6 +69,7 @@ public class Blackjack extends Application{
       Group menu = new Group();
       Group instructionsGroup = new Group();
       Group saveScoreGroup = new Group();
+      Group viewScoresGroup = new Group();
       
       Circle redChip = new Circle(327, 356, 44, Color.TRANSPARENT);
       Circle blueChip = new Circle(433, 356, 44, Color.TRANSPARENT);
@@ -81,6 +83,7 @@ public class Blackjack extends Application{
       Button exitButton = new Button("Exit Game");
       
       Button backToMenuButton = new Button("Back to Menu");
+      Button toMenuFromScores = new Button("Back To Menu");
       Button insertScoreButton = new Button("Save my Score!");
       
       
@@ -91,6 +94,31 @@ public class Blackjack extends Application{
       Button finishBetButton = new Button("Start Game");
       Button resetBetButton = new Button("Reset Bet");
       Button exitToMenuFromGameButton = new Button("Exit To Menu");
+      
+      /*Labels for displaying top 10 high scores on view scores scene*/
+      Label score1,score2,score3,score4,score5,score6,score7,score8,score9,score10;
+      
+      score1 = new Label("1. --------");
+      score2 = new Label("2. --------");
+      score3 = new Label("3. --------");
+      score4 = new Label("4. --------");
+      score5 = new Label("5. --------");
+      score6 = new Label("6. --------");
+      score7 = new Label("7. --------");
+      score8 = new Label("8. --------");
+      score9 = new Label("9. --------");
+      score10 = new Label("10. --------");
+      
+      Label[] labelArray = new Label[]{score1,score2,score3,score4,score5,score6,score7,score8,score9,score10};
+      int labelTranslateX = 320;
+      int labelYOffset = 0;
+      
+      for(int i =0; i < labelArray.length; i++){
+         labelArray[i].setStyle("-fx-font-size: 18px");
+         labelArray[i].setTranslateX(labelTranslateX);
+         labelArray[i].setTranslateY(50+labelYOffset);
+         labelYOffset+=50;
+      }
       
       TextField nameBox = new TextField();
       
@@ -140,6 +168,7 @@ public class Blackjack extends Application{
       Pane menuPane = new Pane();
       Pane instructionsPane = new Pane();
       Pane saveScorePane = new Pane();
+      Pane viewScoresPane = new Pane();
       
       pane.getChildren().add(hitButton);
       pane.getChildren().add(clearButton);
@@ -171,6 +200,9 @@ public class Blackjack extends Application{
       saveScorePane.getChildren().add(nameBox);
       saveScorePane.getChildren().add(playerMoneyScore);
       
+      viewScoresPane.getChildren().add(toMenuFromScores);
+      viewScoresPane.getChildren().addAll(score1,score2,score3,score4,score5,score6,score7,score8,score9,score10);
+      
       startGameButton.setTranslateX(288);
       startGameButton.setTranslateY(395);
       startGameButton.setStyle("-fx-font-size: 18px; -fx-border-color: red; -fx-cursor: hand");
@@ -195,6 +227,11 @@ public class Blackjack extends Application{
       backToMenuButton.setTranslateY(550);
       backToMenuButton.setStyle("-fx-font-size: 18px; -fx-border-color: red; -fx-cursor: hand");
       backToMenuButton.setMinWidth(200);
+      
+      toMenuFromScores.setTranslateX(288);
+      toMenuFromScores.setTranslateY(550);
+      toMenuFromScores.setStyle("-fx-font-size: 18px; -fx-border-color: red; -fx-cursor: hand");
+      toMenuFromScores.setMinWidth(200);
       
       exitToMenuFromGameButton.setTranslateX(675);
       exitToMenuFromGameButton.setTranslateY(555);
@@ -241,11 +278,13 @@ public class Blackjack extends Application{
       Scene menuScene = new Scene(menu);
       Scene instructionsScene = new Scene(instructionsGroup);
       Scene saveScoreScene = new Scene(saveScoreGroup);
+      Scene viewScoresScene = new Scene(viewScoresGroup);
       
       Canvas canvas = new Canvas(800,600);
       Canvas menuCanvas = new Canvas(800,600);
       Canvas instructionsCanvas = new Canvas(800,600);
       Canvas saveScoreCanvas = new Canvas(800,600);
+      Canvas viewScoresCanvas = new Canvas(800,600);
       
       Deck theDeck = new Deck(); 
       theDeck.shuffle();     
@@ -256,6 +295,7 @@ public class Blackjack extends Application{
       Image menuBackground = new Image("assets/images/menuBackground.png");
       Image instructionsBackground = new Image("assets/images/instructions.png");
       Image nameBackground = new Image("assets/images/nameBackground.png");
+      Image scoresBackground = new Image("assets/images/scoresBackground.png");
       
       Timeline gameLoop = new Timeline();
       
@@ -269,12 +309,15 @@ public class Blackjack extends Application{
       instructionsGroup.getChildren().add(instructionsPane);
       saveScoreGroup.getChildren().add(saveScoreCanvas);
       saveScoreGroup.getChildren().add(saveScorePane);
+      viewScoresGroup.getChildren().add(viewScoresCanvas);
+      viewScoresGroup.getChildren().add(viewScoresPane);
       
       
       GraphicsContext gc = canvas.getGraphicsContext2D();  
       GraphicsContext mgc = menuCanvas.getGraphicsContext2D(); 
       GraphicsContext igc = instructionsCanvas.getGraphicsContext2D();
       GraphicsContext sgc = saveScoreCanvas.getGraphicsContext2D();
+      GraphicsContext vgc = viewScoresCanvas.getGraphicsContext2D();
       
       gameLoop.setCycleCount(Timeline.INDEFINITE);
            
@@ -395,11 +438,34 @@ public class Blackjack extends Application{
       });
       
       saveScoreButton.setOnAction(e->mainStage.setScene(saveScoreScene));
+      
+      viewScoresButton.setOnAction(e->{
+      try{
+            String query = "SELECT * FROM scores ORDER BY score DESC LIMIT 10";
+            PreparedStatement pst = conn.prepareStatement(query);
+            ResultSet rs = pst.executeQuery();
+            String str = "";
+            int num = 0;
+            for(int i = 0; i < labelArray.length; i++){
+               if(rs.next()){
+                  str = rs.getString(1);
+                  num = rs.getInt(2);
+                  labelArray[i].setText(i + 1 + ". " + str + " : $" + num);
+               }
+            }
+            System.out.println(str + " " + num);
+         }catch(Exception e2){
+            System.out.println(e2);
+         }
+         mainStage.setScene(viewScoresScene);
+      });
+      
+      toMenuFromScores.setOnAction(e->mainStage.setScene(menuScene));
    
       drawBackground(gc,background,deckImage);
       
       KeyFrame frame = new KeyFrame(
-            Duration.seconds(0.017),   // 1000/60 for 60 FPS
+            Duration.seconds(0.050),   // 1000/50 for 20 FPS
             e ->{  
                    if(!betFinished.value){
                      betInstructionsDisplay.setText("-Click on the Chips to increase bet-");
@@ -517,6 +583,9 @@ public class Blackjack extends Application{
                    sgc.drawImage(nameBackground, 0 ,0);
                    playerMoneyScore.setText("Your Score: $" + player.getMoney());
                    
+                   /*Draw view scores page with view score graphics context (vgc)*/
+                   vgc.drawImage(scoresBackground, 0 ,0);
+                   
                });
                gameLoop.getKeyFrames().add(frame);
                gameLoop.play();
@@ -577,9 +646,9 @@ public class Blackjack extends Application{
    
    public void checkConnection(Connection conn){
       if(conn == null){
-         System.out.println("Connection failed");
+         System.out.println("Database Connection failed");
       }else{
-         System.out.println("Connection successful!");
+         System.out.println("Database Connection successful!");
       }
    }
    
