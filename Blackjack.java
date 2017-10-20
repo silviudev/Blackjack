@@ -26,6 +26,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.net.URLDecoder;
+import java.security.CodeSource;
+import java.io.File;
 
 public class Blackjack extends Application{
 
@@ -43,7 +46,19 @@ public class Blackjack extends Application{
       BooleanValue initialCardsDealt = new BooleanValue(false);
       
       /*SQLite database connection*/
-      Connection conn = SQLConnection.DbConnector();
+      CodeSource codeSource = Blackjack.class.getProtectionDomain().getCodeSource();
+      String jarDir = "";
+      try{
+         /*Get file path to the database that will be located in the parent directory of the executable JAR,
+         since database cannot be inside the jar because jars are read-only*/
+         File jarFile = new File(codeSource.getLocation().toURI().getPath());
+         jarDir = jarFile.getParentFile().getPath();
+         jarDir = jarDir.replace("\\", "/");
+         System.out.println(jarDir);
+      }catch(Exception e){
+         System.out.println(e);
+      }
+      Connection conn = SQLConnection.DbConnector(jarDir + "/blackjackdb.sqlite");
       checkConnection(conn);
       
       /*xOffset and previousX are used to define the spacing between cards when drawing the player

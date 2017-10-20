@@ -11,13 +11,12 @@ hits on 17. More detailed game rules and instructions are available in-game via 
 in the main menu.
 
 To run this game, you need at least 128MB of free memory but 256MB or more is recommended. You can run this 
-game by simply downloading the Blackjack.jar file from this repo. The jar file is an executable file that 
-contains all the other files in this repo packaged within. It should run on Windows, Mac, or Linux as long as 
+game by simply downloading the BlackjackGame ZIP file from this repo, unzipping, and running the Blackjack.jar executable. It should run on Windows, Mac, or Linux as long as 
 you have Java 8 or higher installed on your computer AND your Java 8 installation contains JavaFX 8 or higher. 
-(Some Linux distros don't come with JavaFX in their JDK/JRE by default and it has to be downloaded seperately)
+(Some JDK implementations like OpenJDK for Linux don't come with JavaFX by default and it has to be downloaded seperately)
 
 Alternatively, you can compile the files yourself by downloading this repo and opening the main class 
-(Blackjack.java) in an IDE, then compiling and running.
+(Blackjack.java) in an IDE, then compiling and running. Ensure that you have the latest SQLite JDBC library in your Java classpath when running.
 
 ###Development info and game logic
 This game is written in Java with the JavaFX framework and also uses an embedded SQLite database to keep track 
