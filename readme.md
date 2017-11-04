@@ -1,7 +1,7 @@
-##Welcome to Blackjack
-###Made By Silviu Popovici
+## Welcome to Blackjack
+### Made By Silviu Popovici
 
-###Blackjack rules and running the game
+### Blackjack rules and running the game
 Blackjack is a classic card game where the point is to obtain a hand worth 21 or less without going over 21, 
 and to beat the dealer who is also trying to do the same in order to win money. Number cards are worth their 
 numeric value. Kings,Queens,and Jacks are worth 10 and Aces are worth 1 or 11 depending on which makes a better 
@@ -18,7 +18,7 @@ you have Java 8 or higher installed on your computer AND your Java 8 installatio
 Alternatively, you can compile the files yourself by downloading this repo and opening the main class 
 (Blackjack.java) in an IDE, then compiling and running. Ensure that you have the latest SQLite JDBC library in your Java classpath when running.
 
-###Development info and game logic
+### Development info and game logic
 This game is written in Java with the JavaFX framework and also uses an embedded SQLite database to keep track 
 of high scores. It is made up of multiple scenes, including the main menu scene, the main game scene, and the 
 high scores scene. These scenes are contained within the main Stage, which in JavaFX is the main window of the 
