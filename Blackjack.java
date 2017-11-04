@@ -419,6 +419,8 @@ public class Blackjack extends Application{
       /*===BUTTON EVENT LISTENERS ===*/
       startGameButton.setOnAction(e->{
          mainStage.setScene(gameScene);
+         mainStage.setHeight(625);
+		   mainStage.setWidth(804);
          resetGame(gc, previousX, player, dealer, gameOver, dealersTurn, betFinished);
       });
       
@@ -531,7 +533,7 @@ public class Blackjack extends Application{
                    /*If betting phase is not finished, display the bet buttons and text. Otherwise,
                    hide them and deal the initial cards*/
                    if(!betFinished.value){
-                     betInstructionsDisplay.setText("-Click on the Chips to increase bet-");
+                     betInstructionsDisplay.setText("-Click chips to increase bet-");
                      resetBetButton.setVisible(true);
                      finishBetButton.setVisible(true);
                    }else if(betFinished.value && !initialCardsDealt.value){
