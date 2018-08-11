@@ -42,4 +42,4 @@ allow the user to save their score and also to retrieve the top 10 high scores.
 
 If you have any questions about this project feel free to email me at Silviudev1@gmail.com. 
 
-Check out my site at www.silviudev.com for more info on me and my projects! 
+Check out my site at https://silviudev.github.io/ for more info on me and my projects! 
